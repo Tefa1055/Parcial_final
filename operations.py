@@ -16,3 +16,4 @@ def get_user_by_username(session: Session, username: str) -> Optional[User]:
 def get_user_by_id(session: Session, user_id: int) -> Optional[User]:
     """Obtiene un usuario por su ID."""
     return session.exec(select(User).where(User.id == user_id)).first()
+
