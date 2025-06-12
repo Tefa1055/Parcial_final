@@ -1,3 +1,7 @@
+Diagrama de clases:
+
+https://lucid.app/lucidchart/cbea5fda-f472-4eab-af30-800355b0dea0/edit?viewport_loc=200%2C-503%2C2217%2C1089%2C0_0&invitationId=inv_9beb8a46-2f57-4417-87f6-7ab9c7bd43f7
+
 
 - ✅ Registro y autenticación de usuarios
 - ✅ Gestión de mascotas (CRUD)
