@@ -1,252 +1,131 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, func
-from datetime import datetime, date
-import models
-import schemas
+from sqlalchemy import and_
+from typing import List, Optional
+from datetime import date
 import random
 import string
 
+from models import Usuario, Mascota, Vuelo, Reserva
+from schemas import UsuarioCreate, MascotaCreate, ReservaCreate
+from auth import hash_password
 
-def get_user(db: Session, user_id: int):
-    return db.query(models.User).filter(models.User.id == user_id).first()
-
-
-def get_user_by_email(db: Session, email: str):
-    return db.query(models.User).filter(models.User.email == email).first()
-
-
-def get_users(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.User).offset(skip).limit(limit).all()
-
-
-def create_user(db: Session, user: schemas.UserCreate):
-    db_user = models.User(**user.dict())
-    db.add(db_user)
+def crear_usuario(db: Session, usuario: UsuarioCreate) -> Usuario:
+    password_hash = hash_password(usuario.password)
+    db_usuario = Usuario(
+        nombre=usuario.nombre,
+        apellido=usuario.apellido,
+        email=usuario.email,
+        telefono=usuario.telefono,
+        password_hash=password_hash
+    )
+    db.add(db_usuario)
     db.commit()
-    db.refresh(db_user)
-    return db_user
+    db.refresh(db_usuario)
+    return db_usuario
 
+def obtener_usuario_por_email(db: Session, email: str) -> Optional[Usuario]:
+    return db.query(Usuario).filter(Usuario.email == email).first()
 
-def update_user(db: Session, user_id: int, user: schemas.UserUpdate):
-    db_user = db.query(models.User).filter(models.User.id == user_id).first()
-    if db_user:
-        update_data = user.dict(exclude_unset=True)
-        for field, value in update_data.items():
-            setattr(db_user, field, value)
-        db.commit()
-        db.refresh(db_user)
-    return db_user
+def obtener_usuario_por_id(db: Session, usuario_id: int) -> Optional[Usuario]:
+    return db.query(Usuario).filter(Usuario.id == usuario_id).first()
 
-
-def delete_user(db: Session, user_id: int):
-    db_user = db.query(models.User).filter(models.User.id == user_id).first()
-    if db_user:
-        db.delete(db_user)
-        db.commit()
-    return db_user
-
-
-def get_pet(db: Session, pet_id: int):
-    return db.query(models.Pet).filter(models.Pet.id == pet_id).first()
-
-
-def get_pets_by_user(db: Session, user_id: int):
-    return db.query(models.Pet).filter(models.Pet.id_usuario == user_id).all()
-
-
-def get_pets(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.Pet).offset(skip).limit(limit).all()
-
-
-def create_pet(db: Session, pet: schemas.PetCreate):
-    db_pet = models.Pet(**pet.dict())
-    db.add(db_pet)
+def crear_mascota(db: Session, mascota: MascotaCreate, propietario_id: int) -> Mascota:
+    db_mascota = Mascota(
+        nombre=mascota.nombre,
+        especie=mascota.especie,
+        raza=mascota.raza,
+        edad=mascota.edad,
+        peso=mascota.peso,
+        observaciones=mascota.observaciones,
+        propietario_id=propietario_id
+    )
+    db.add(db_mascota)
     db.commit()
-    db.refresh(db_pet)
-    return db_pet
+    db.refresh(db_mascota)
+    return db_mascota
 
+def obtener_mascotas_usuario(db: Session, usuario_id: int) -> List[Mascota]:
+    return db.query(Mascota).filter(
+        and_(Mascota.propietario_id == usuario_id, Mascota.activo == True)
+    ).all()
 
-def update_pet(db: Session, pet_id: int, pet: schemas.PetUpdate):
-    db_pet = db.query(models.Pet).filter(models.Pet.id == pet_id).first()
-    if db_pet:
-        update_data = pet.dict(exclude_unset=True)
-        for field, value in update_data.items():
-            setattr(db_pet, field, value)
-        db.commit()
-        db.refresh(db_pet)
-    return db_pet
-
-
-def delete_pet(db: Session, pet_id: int):
-    db_pet = db.query(models.Pet).filter(models.Pet.id == pet_id).first()
-    if db_pet:
-        db.delete(db_pet)
-        db.commit()
-    return db_pet
-
-
-def get_flight(db: Session, flight_id: int):
-    return db.query(models.Flight).filter(models.Flight.id == flight_id).first()
-
-
-def get_flights(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.Flight).offset(skip).limit(limit).all()
-
-
-def search_flights(db: Session, origen: str, destino: str, fecha: date):
-    return db.query(models.Flight).filter(
+def obtener_mascota_por_id(db: Session, mascota_id: int) -> Optional[Mascota]:
+    return db.query(Mascota).filter(Mascota.id == mascota_id).first()
+    
+def buscar_vuelos(db: Session, origen: str, destino: str, fecha: date) -> List[Vuelo]:
+    return db.query(Vuelo).filter(
         and_(
-            models.Flight.origen.ilike(f"%{origen}%"),
-            models.Flight.destino.ilike(f"%{destino}%"),
-            func.date(models.Flight.fecha_salida) == fecha,
-            models.Flight.disponible == True
+            Vuelo.origen.ilike(f"%{origen}%"),
+            Vuelo.destino.ilike(f"%{destino}%"),
+            Vuelo.fecha_salida == fecha,
+            Vuelo.disponible == True
         )
     ).all()
 
+def obtener_vuelo_por_id(db: Session, vuelo_id: int) -> Optional[Vuelo]:
+    return db.query(Vuelo).filter(Vuelo.id == vuelo_id).first()
 
-def create_flight(db: Session, flight: schemas.FlightCreate):
-    db_flight = models.Flight(**flight.dict())
-    db.add(db_flight)
-    db.commit()
-    db.refresh(db_flight)
-    return db_flight
-
-
-def update_flight(db: Session, flight_id: int, flight: schemas.FlightUpdate):
-    db_flight = db.query(models.Flight).filter(models.Flight.id == flight_id).first()
-    if db_flight:
-        update_data = flight.dict(exclude_unset=True)
-        for field, value in update_data.items():
-            setattr(db_flight, field, value)
-        db.commit()
-        db.refresh(db_flight)
-    return db_flight
-
-
-def delete_flight(db: Session, flight_id: int):
-    db_flight = db.query(models.Flight).filter(models.Flight.id == flight_id).first()
-    if db_flight:
-        db.delete(db_flight)
-        db.commit()
-    return db_flight
-
-
-def check_flight_availability(db: Session, flight_id: int):
-    flight = db.query(models.Flight).filter(models.Flight.id == flight_id).first()
-    if not flight or not flight.disponible:
+def verificar_disponibilidad_vuelo(db: Session, vuelo_id: int) -> bool:
+    vuelo = obtener_vuelo_por_id(db, vuelo_id)
+    if not vuelo or not vuelo.disponible:
         return False
-
-    reserved_pets = db.query(models.Reservation).filter(
+    
+    # Contar reservas activas para este vuelo
+    reservas_activas = db.query(Reserva).filter(
         and_(
-            models.Reservation.id_vuelo == flight_id,
-            models.Reservation.estado.in_(["pendiente", "confirmada"])
+            Reserva.vuelo_id == vuelo_id,
+            Reserva.estado == "confirmada"
         )
     ).count()
+    
+    return reservas_activas < vuelo.capacidad_mascotas
 
-    return reserved_pets < flight.capacidad_mascotas
-
-
-def generate_reservation_code():
+def generar_codigo_reserva() -> str:
+    """Genera un código de reserva único de 8 caracteres"""
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
 
-
-def get_reservation(db: Session, reservation_id: int):
-    return db.query(models.Reservation).filter(models.Reservation.id == reservation_id).first()
-
-
-def get_reservations_by_user(db: Session, user_id: int):
-    return db.query(models.Reservation).filter(models.Reservation.id_usuario == user_id).all()
-
-
-def get_reservations(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.Reservation).offset(skip).limit(limit).all()
-
-
-def create_reservation(db: Session, reservation: schemas.ReservationCreate):
-    if not check_flight_availability(db, reservation.id_vuelo):
-        return None
-
-    flight = get_flight(db, reservation.id_vuelo)
-    if not flight:
-        return None
-
-    total_price = flight.precio_base + flight.precio_mascota
-
-    db_reservation = models.Reservation(
-        **reservation.dict(),
-        codigo_reserva=generate_reservation_code(),
-        precio_total=total_price
+def crear_reserva(db: Session, reserva: ReservaCreate, usuario_id: int) -> Reserva:
+    # Verificar que el vuelo existe y está disponible
+    vuelo = obtener_vuelo_por_id(db, reserva.vuelo_id)
+    if not vuelo:
+        raise ValueError("Vuelo no encontrado")
+    
+    if not verificar_disponibilidad_vuelo(db, reserva.vuelo_id):
+        raise ValueError("Vuelo no disponible")
+    
+    # Verificar que la mascota pertenece al usuario
+    mascota = obtener_mascota_por_id(db, reserva.mascota_id)
+    if not mascota or mascota.propietario_id != usuario_id:
+        raise ValueError("Mascota no encontrada o no pertenece al usuario")
+    
+    # Calcular precio total
+    precio_total = vuelo.precio_base + vuelo.precio_mascota
+    
+    # Generar código de reserva único
+    codigo_reserva = generar_codigo_reserva()
+    while db.query(Reserva).filter(Reserva.codigo_reserva == codigo_reserva).first():
+        codigo_reserva = generar_codigo_reserva()
+    
+    db_reserva = Reserva(
+        codigo_reserva=codigo_reserva,
+        usuario_id=usuario_id,
+        vuelo_id=reserva.vuelo_id,
+        mascota_id=reserva.mascota_id,
+        precio_total=precio_total,
+        observaciones=reserva.observaciones
     )
-    db.add(db_reservation)
+    
+    db.add(db_reserva)
     db.commit()
-    db.refresh(db_reservation)
-    return db_reservation
+    db.refresh(db_reserva)
+    return db_reserva
 
+def obtener_reservas_usuario(db: Session, usuario_id: int) -> List[Reserva]:
+    return db.query(Reserva).filter(Reserva.usuario_id == usuario_id).all()
 
-def update_reservation(db: Session, reservation_id: int, reservation: schemas.ReservationUpdate):
-    db_reservation = db.query(models.Reservation).filter(models.Reservation.id == reservation_id).first()
-    if db_reservation:
-        update_data = reservation.dict(exclude_unset=True)
-        for field, value in update_data.items():
-            setattr(db_reservation, field, value)
-        db.commit()
-        db.refresh(db_reservation)
-    return db_reservation
+def obtener_reserva_por_codigo(db: Session, codigo_reserva: str) -> Optional[Reserva]:
+    return db.query(Reserva).filter(Reserva.codigo_reserva == codigo_reserva).first()
 
-
-def delete_reservation(db: Session, reservation_id: int):
-    db_reservation = db.query(models.Reservation).filter(models.Reservation.id == reservation_id).first()
-    if db_reservation:
-        db.delete(db_reservation)
-        db.commit()
-    return db_reservation
-
-
-def get_purchase(db: Session, purchase_id: int):
-    return db.query(models.Purchase).filter(models.Purchase.id == purchase_id).first()
-
-
-def get_purchase_by_reservation(db: Session, reservation_id: int):
-    return db.query(models.Purchase).filter(models.Purchase.id_reserva == reservation_id).first()
-
-
-def get_purchases(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.Purchase).offset(skip).limit(limit).all()
-
-
-def create_purchase(db: Session, purchase: schemas.PurchaseCreate):
-    # Get reservation to calculate amount
-    reservation = get_reservation(db, purchase.id_reserva)
-    if not reservation:
-        return None
-
-    db_purchase = models.Purchase(
-        **purchase.dict(),
-        monto=reservation.precio_total
-    )
-    db.add(db_purchase)
-    db.commit()
-    db.refresh(db_purchase)
-
-    update_reservation(db, purchase.id_reserva, schemas.ReservationUpdate(estado="confirmada"))
-
-    return db_purchase
-
-
-def update_purchase(db: Session, purchase_id: int, purchase: schemas.PurchaseUpdate):
-    db_purchase = db.query(models.Purchase).filter(models.Purchase.id == purchase_id).first()
-    if db_purchase:
-        update_data = purchase.dict(exclude_unset=True)
-        for field, value in update_data.items():
-            setattr(db_purchase, field, value)
-        db.commit()
-        db.refresh(db_purchase)
-    return db_purchase
-
-
-def delete_purchase(db: Session, purchase_id: int):
-    db_purchase = db.query(models.Purchase).filter(models.Purchase.id == purchase_id).first()
-    if db_purchase:
-        db.delete(db_purchase)
-        db.commit()
-    return db_purchase
+def verificar_password(password: str, password_hash: str) -> bool:
+    from auth import verify_password
+    return verify_password(password, password_hash)
