@@ -5,9 +5,9 @@ def get_flights(db: Session, skip: int = 0, limit: int = 100):
 return db.query(models.Flight).offset(skip).limit(limit).all()
 
 def search_flights(db: Session, origen: str, destino: str, fecha: date):
-return db.query(models.Flight).filter(
-and_(
-models.Flight.origen.ilike(f"%{origen}%"),
+
+
+    return db.query(models.Flight).filter(and_(models.Flight.origen.ilike(f"%{origen}%"),
 models.Flight.destino.ilike(f"%{destino}%"),
 func.date(models.Flight.fecha_salida) == fecha,
 models.Flight.disponible == True
