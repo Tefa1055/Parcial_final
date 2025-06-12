@@ -1,0 +1,487 @@
+
+<title>Hablar - Viaja con tu Mascota</title> <style> * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        font-family: 'Arial', sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    header {
+        text-align: center;
+        color: white;
+        margin-bottom: 40px;
+    }
+
+    h1 {
+        font-size: 3rem;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+    }
+
+    .main-content {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 30px;
+        margin-bottom: 40px;
+    }
+
+    .card {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+
+    .card h2 {
+        color: #667eea;
+        margin-bottom: 20px;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .icon {
+        font-size: 1.8rem;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #555;
+    }
+
+    input, select, textarea {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: border-color 0.3s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+
+    button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        transition: transform 0.2s ease;
+        width: 100%;
+    }
+
+    button:hover {
+        transform: translateY(-2px);
+    }
+
+    .search-results, .api-response {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 20px;
+        border-left: 4px solid #667eea;
+    }
+
+    .flight-item {
+        background: white;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+    }
+
+    .flight-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .flight-route {
+        font-weight: bold;
+        color: #667eea;
+    }
+
+    .flight-price {
+        background: #28a745;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-weight: bold;
+    }
+
+    .api-info {
+        background: #e9ecef;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 30px;
+    }
+
+    .api-info h3 {
+        color: #667eea;
+        margin-bottom: 15px;
+    }
+
+    .endpoint {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 5px;
+        margin: 5px 0;
+        font-family: monospace;
+        border-left: 3px solid #667eea;
+    }
+
+    .pet-emoji {
+        font-size: 2rem;
+        margin: 10px 0;
+    }
+
+    @media (max-width: 768px) {
+        .container {
+            padding: 10px;
+        }
+
+        h1 {
+            font-size: 2rem;
+        }
+
+        .main-content {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+🐾 Hablar ✈️
+
+Sistema de Reservas de Vuelos para Mascotas
+
+    <div class="main-content">
+        <!-- Búsqueda de Vuelos -->
+        <div class="card">
+            <h2><span class="icon">🔍</span>Buscar Vuelos</h2>
+            <form id="searchForm">
+                <div class="form-group">
+                    <label for="origen">Origen:</label>
+                    <input type="text" id="origen" name="origen" placeholder="Ciudad de origen" required>
+                </div>
+                <div class="form-group">
+                    <label for="destino">Destino:</label>
+                    <input type="text" id="destino" name="destino" placeholder="Ciudad de destino" required>
+                </div>
+                <div class="form-group">
+                    <label for="fecha">Fecha de viaje:</label>
+                    <input type="date" id="fecha" name="fecha" required>
+                </div>
+                <button type="submit">Buscar Vuelos</button>
+            </form>
+            <div id="searchResults" class="search-results" style="display: none;"></div>
+        </div>
+
+        <!-- Registro de Usuario -->
+        <div class="card">
+            <h2><span class="icon">👤</span>Registro de Usuario</h2>
+            <form id="userForm">
+                <div class="form-group">
+                    <label for="nombre">Nombre completo:</label>
+                    <input type="text" id="nombre" name="nombre" placeholder="Tu nombre completo" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" placeholder="tu@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="telefono">Teléfono:</label>
+                    <input type="tel" id="telefono" name="telefono" placeholder="+1234567890">
+                </div>
+                <button type="submit">Registrar Usuario</button>
+            </form>
+            <div id="userResponse" class="api-response" style="display: none;"></div>
+        </div>
+
+        <!-- Registro de Mascota -->
+        <div class="card">
+            <h2><span class="icon">🐕</span>Registro de Mascota</h2>
+            <div class="pet-emoji">🐕 🐱 🐰 🐦</div>
+            <form id="petForm">
+                <div class="form-group">
+                    <label for="id_usuario">ID de Usuario:</label>
+                    <input type="number" id="id_usuario" name="id_usuario" placeholder="ID del propietario" required>
+                </div>
+                <div class="form-group">
+                    <label for="nombre_mascota">Nombre de la mascota:</label>
+                    <input type="text" id="nombre_mascota" name="nombre_mascota" placeholder="Nombre de tu mascota" required>
+                </div>
+                <div class="form-group">
+                    <label for="especie">Especie:</label>
+                    <select id="especie" name="especie" required>
+                        <option value="">Selecciona una especie</option>
+                        <option value="perro">Perro</option>
+                        <option value="gato">Gato</option>
+                        <option value="conejo">Conejo</option>
+                        <option value="ave">Ave</option>
+                        <option value="otro">Otro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="raza">Raza:</label>
+                    <input type="text" id="raza" name="raza" placeholder="Raza de la mascota">
+                </div>
+                <div class="form-group">
+                    <label for="peso">Peso (kg):</label>
+                    <input type="number" id="peso" name="peso" step="0.1" placeholder="Peso en kilogramos" required>
+                </div>
+                <div class="form-group">
+                    <label for="edad">Edad (años):</label>
+                    <input type="number" id="edad" name="edad" placeholder="Edad en años">
+                </div>
+                <div class="form-group">
+                    <label for="observaciones">Observaciones:</label>
+                    <textarea id="observaciones" name="observaciones" rows="3" placeholder="Información adicional sobre tu mascota"></textarea>
+                </div>
+                <button type="submit">Registrar Mascota</button>
+            </form>
+            <div id="petResponse" class="api-response" style="display: none;"></div>
+        </div>
+
+        <!-- Crear Reserva -->
+        <div class="card">
+            <h2><span class="icon">📅</span>Crear Reserva</h2>
+            <form id="reservationForm">
+                <div class="form-group">
+                    <label for="res_id_usuario">ID de Usuario:</label>
+                    <input type="number" id="res_id_usuario" name="id_usuario" placeholder="Tu ID de usuario" required>
+                </div>
+                <div class="form-group">
+                    <label for="id_vuelo">ID de Vuelo:</label>
+                    <input type="number" id="id_vuelo" name="id_vuelo" placeholder="ID del vuelo seleccionado" required>
+                </div>
+                <div class="form-group">
+                    <label for="id_mascota">ID de Mascota:</label>
+                    <input type="number" id="id_mascota" name="id_mascota" placeholder="ID de tu mascota" required>
+                </div>
+                <button type="submit">Crear Reserva</button>
+            </form>
+            <div id="reservationResponse" class="api-response" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Información de la API -->
+    <div class="api-info">
+        <h3>📚 Documentación de la API</h3>
+        <p>Esta aplicación proporciona una API REST completa. Puedes acceder a:</p>
+        <div class="endpoint">GET /docs - Documentación interactiva (Swagger UI)</div>
+        <div class="endpoint">GET /redoc - Documentación alternativa (ReDoc)</div>
+        <div class="endpoint">GET /users/ - Listar todos los usuarios</div>
+        <div class="endpoint">GET /pets/ - Listar todas las mascotas</div>
+        <div class="endpoint">GET /flights/ - Listar todos los vuelos</div>
+        <div class="endpoint">POST /flights/search/ - Buscar vuelos disponibles</div>
+        <div class="endpoint">GET /reservations/ - Listar todas las reservas</div>
+    </div>
+</div>
+
+<script>
+    // Configuración base de la API
+    const API_BASE = '';
+
+    // Función para mostrar respuestas
+    function showResponse(elementId, data, isError = false) {
+        const element = document.getElementById(elementId);
+        element.style.display = 'block';
+        element.innerHTML = `
+            <strong>${isError ? 'Error:' : 'Respuesta:'}</strong>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+        `;
+        element.style.backgroundColor = isError ? '#f8d7da' : '#d4edda';
+        element.style.borderColor = isError ? '#dc3545' : '#28a745';
+    }
+
+    // Búsqueda de vuelos
+    document.getElementById('searchForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const searchData = {
+            origen: formData.get('origen'),
+            destino: formData.get('destino'),
+            fecha: formData.get('fecha') + 'T00:00:00'
+        };
+
+        try {
+            const response = await fetch('/flights/search/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(searchData)
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                displayFlights(data);
+            } else {
+                showResponse('searchResults', data, true);
+            }
+        } catch (error) {
+            showResponse('searchResults', {error: 'Error de conexión'}, true);
+        }
+    });
+
+    // Función para mostrar vuelos
+    function displayFlights(flights) {
+        const resultsDiv = document.getElementById('searchResults');
+        resultsDiv.style.display = 'block';
+
+        if (flights.length === 0) {
+            resultsDiv.innerHTML = '<p>No se encontraron vuelos para los criterios especificados.</p>';
+            return;
+        }
+
+        let html = '<h4>Vuelos Disponibles:</h4>';
+        flights.forEach(flight => {
+            html += `
+                <div class="flight-item">
+                    <div class="flight-header">
+                        <span class="flight-route">${flight.origen} → ${flight.destino}</span>
+                        <span class="flight-price">$${flight.precio_base + flight.precio_mascota}</span>
+                    </div>
+                    <p><strong>Vuelo:</strong> ${flight.numero_vuelo}</p>
+                    <p><strong>Salida:</strong> ${new Date(flight.fecha_salida).toLocaleString()}</p>
+                    <p><strong>Llegada:</strong> ${new Date(flight.fecha_llegada).toLocaleString()}</p>
+                    <p><strong>Capacidad mascotas:</strong> ${flight.capacidad_mascotas}</p>
+                    <p><strong>ID del vuelo:</strong> ${flight.id} (usar para reservar)</p>
+                </div>
+            `;
+        });
+        resultsDiv.innerHTML = html;
+    }
+
+    // Registro de usuario
+    document.getElementById('userForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const userData = {
+            nombre: formData.get('nombre'),
+            email: formData.get('email'),
+            telefono: formData.get('telefono') || null
+        };
+
+        try {
+            const response = await fetch('/users/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userData)
+            });
+
+            const data = await response.json();
+            showResponse('userResponse', data, !response.ok);
+
+            if (response.ok) {
+                e.target.reset();
+            }
+        } catch (error) {
+            showResponse('userResponse', {error: 'Error de conexión'}, true);
+        }
+    });
+
+    // Registro de mascota
+    document.getElementById('petForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const petData = {
+            id_usuario: parseInt(formData.get('id_usuario')),
+            nombre_mascota: formData.get('nombre_mascota'),
+            especie: formData.get('especie'),
+            raza: formData.get('raza') || null,
+            peso: parseFloat(formData.get('peso')),
+            edad: formData.get('edad') ? parseInt(formData.get('edad')) : null,
+            observaciones: formData.get('observaciones') || null
+        };
+
+        try {
+            const response = await fetch('/pets/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(petData)
+            });
+
+            const data = await response.json();
+            showResponse('petResponse', data, !response.ok);
+
+            if (response.ok) {
+                e.target.reset();
+            }
+        } catch (error) {
+            showResponse('petResponse', {error: 'Error de conexión'}, true);
+        }
+    });
+
+    // Crear reserva
+    document.getElementById('reservationForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const reservationData = {
+            id_usuario: parseInt(formData.get('id_usuario')),
+            id_vuelo: parseInt(formData.get('id_vuelo')),
+            id_mascota: parseInt(formData.get('id_mascota'))
+        };
+
+        try {
+            const response = await fetch('/reservations/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(reservationData)
+            });
+
+            const data = await response.json();
+            showResponse('reservationResponse', data, !response.ok);
+
+            if (response.ok) {
+                e.target.reset();
+            }
+        } catch (error) {
+            showResponse('reservationResponse', {error: 'Error de conexión'}, true);
+        }
+    });
+
+    // Establecer fecha mínima como hoy
+    document.getElementById('fecha').min = new Date().toISOString().split('T')[0];
+</script>
+

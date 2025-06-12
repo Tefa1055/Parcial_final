@@ -1,0 +1,19 @@
+
+
+    type: web
+    name: hablar-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    envVars:
+        key: DATABASE_URL
+        fromDatabase:
+        name: hablar-db
+        property: connectionString
+
+    type: pserv
+    name: hablar-db
+    env: postgresql
+    plan: free
+    databaseName: hablar_db
+    user: hablar_user
