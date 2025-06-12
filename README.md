@@ -105,3 +105,21 @@ POST /reservas
   "mascota_id": 1,
   "observaciones": "Primera vez que viaja"
 }
+Clases de uso:
+
+Modelos de Datos  Usuario 
+Información personal (nombre, apellido, email, teléfono)
+Autenticación segura con hash de contraseña
+Relación con mascotas y reservas
+  
+Mascota 
+Información de la mascota (nombre, especie, raza, edad, peso)
+Vinculada a un propietario
+Observaciones especiales
+  
+Vuelo 
+Información del vuelo (origen, destino, fechas, horarios)
+Precios diferenciados (base + mascota)
+Control de capacidad
+  
+Reserva
